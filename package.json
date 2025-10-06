@@ -1,16 +1,9 @@
 {
   "name": "wooplans-lygos-api",
   "version": "1.0.0",
-  "description": "API Node.js pour connecter le site Framer Wooplans à Lygos",
   "type": "module",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "vercel dev"
   },
-  "dependencies": {
-    "axios": "^1.7.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.0",
-    "express": "^4.18.2"
-  }
+  "dependencies": {}
 }
