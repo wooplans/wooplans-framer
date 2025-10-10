@@ -1,11 +1,11 @@
-const fetch = require('node-fetch'); // Ou utilise built-in fetch en Node 18+
-
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { amount, orderId, shopName } = req.body; // Récupère du client
+  const { amount, orderId, shopName } = req.body;
+  if (!amount || !orderId) return res.status(400).json({ error: "Amount et orderId requis" });
+
   const payload = {
-    amount,
+    amount: parseInt(amount), // Assure-toi que c'est un integer
     shop_name: shopName || "Wooplan",
     order_id: orderId,
     message: "Paiement Wooplans",
@@ -18,15 +18,19 @@ module.exports = async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "api-key": process.env.LYGOS_API_KEY // Stocke ta clé en env var Vercel
+        "api-key": process.env.LYGOS_API_KEY
       },
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) throw new Error("Erreur Lygos");
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Erreur Lygos: ${response.status} - ${errorData}`);
+    }
     const data = await response.json();
     res.json({ link: data.link });
   } catch (error) {
-    res.status(500).json({ error: "Échec création paiement" });
+    console.error("Erreur dans create-payment:", error); // Pour les logs Vercel
+    res.status(500).json({ error: "Échec création paiement: " + error.message });
   }
 };
