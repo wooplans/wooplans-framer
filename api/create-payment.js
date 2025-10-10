@@ -1,51 +1,32 @@
-import fetch from "node-fetch";
+const fetch = require('node-fetch'); // Ou utilise built-in fetch en Node 18+
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Méthode non autorisée" });
-  }
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).end();
+
+  const { amount, orderId, shopName } = req.body; // Récupère du client
+  const payload = {
+    amount,
+    shop_name: shopName || "Wooplan",
+    order_id: orderId,
+    message: "Paiement Wooplans",
+    success_url: `https://wooplans.com/success?order=${orderId}`,
+    failure_url: `https://wooplans.com/failure?order=${orderId}`
+  };
 
   try {
-    const { amount, currency, message, success_url, failure_url } = req.body;
-
-    // Validation simple
-    if (!amount || !currency || !message) {
-      return res.status(400).json({ message: "Champs manquants dans la requête" });
-    }
-
-    // Appel à l'API Lygos
     const response = await fetch("https://api.lygosapp.com/v1/gateway", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.LYGOS_API_KEY}
+        "api-key": process.env.LYGOS_API_KEY // Stocke ta clé en env var Vercel
       },
-      body: JSON.stringify({
-        amount,
-        currency,
-        message,
-        shop_name: "WooPlans Sandbox",
-        success_url,
-        failure_url
-      })
+      body: JSON.stringify(payload)
     });
 
+    if (!response.ok) throw new Error("Erreur Lygos");
     const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Erreur Lygos:", data);
-      return res.status(500).json({ message: "Erreur Lygos", details: data });
-    }
-
-    // Renvoie le lien de paiement au frontend Framer
-    return res.status(200).json({
-      success: true,
-      link: data.link || null,
-      lygos_response: data
-    });
-
+    res.json({ link: data.link });
   } catch (error) {
-    console.error("Erreur API:", error);
-    return res.status(500).json({ message: "Erreur serveur", error: error.message });
+    res.status(500).json({ error: "Échec création paiement" });
   }
-}
+};
