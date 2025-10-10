@@ -1,5 +1,9 @@
 {
   "name": "wooplans-lygos-api",
   "version": "1.0.0",
-  "type": "module"
+  "main": "api/payment.js",
+  "type": "module",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }
