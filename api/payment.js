@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer lygossandbox-876dab2b-6711-49c3-b0ff-a3070aa4946a"
+        "Authorization": `Bearer ${process.env.LYGOS_API_KEY}
       },
       body: JSON.stringify({
         amount,
